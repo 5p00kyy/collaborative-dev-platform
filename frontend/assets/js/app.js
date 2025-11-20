@@ -18,6 +18,12 @@ const AppState = {
 // Utility Functions
 // ============================================
 
+// Get CSRF token from cookie
+function getCsrfTokenFromCookie() {
+  const match = document.cookie.match(/XSRF-TOKEN=([^;]+)/);
+  return match ? match[1] : null;
+}
+
 // Make API requests
 async function apiRequest(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
@@ -37,6 +43,14 @@ async function apiRequest(endpoint, options = {}) {
   // Add auth token if available
   if (AppState.token) {
     headers['Authorization'] = `Bearer ${AppState.token}`;
+  }
+  
+  // Add CSRF token for non-GET requests
+  if (options.method && options.method !== 'GET') {
+    const csrfToken = getCsrfTokenFromCookie();
+    if (csrfToken) {
+      headers['X-XSRF-TOKEN'] = csrfToken;
+    }
   }
   
   // Prepare request options

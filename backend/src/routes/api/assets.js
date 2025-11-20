@@ -2,6 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs').promises;
+const fsSync = require('fs');
 const crypto = require('crypto');
 const { body, validationResult, param } = require('express-validator');
 
@@ -30,6 +31,116 @@ const ALLOWED_MIME_TYPES = [
   'application/x-tar',
   'application/gzip'
 ];
+
+// File type magic bytes for validation
+const FILE_SIGNATURES = {
+  'image/jpeg': [
+    [0xFF, 0xD8, 0xFF]
+  ],
+  'image/png': [
+    [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]
+  ],
+  'image/gif': [
+    [0x47, 0x49, 0x46, 0x38, 0x37, 0x61], // GIF87a
+    [0x47, 0x49, 0x46, 0x38, 0x39, 0x61]  // GIF89a
+  ],
+  'image/webp': [
+    [0x52, 0x49, 0x46, 0x46, null, null, null, null, 0x57, 0x45, 0x42, 0x50] // RIFF....WEBP
+  ],
+  'application/pdf': [
+    [0x25, 0x50, 0x44, 0x46] // %PDF
+  ],
+  'application/zip': [
+    [0x50, 0x4B, 0x03, 0x04], // PK..
+    [0x50, 0x4B, 0x05, 0x06]  // PK.. (empty archive)
+  ]
+};
+
+const ALLOWED_EXTENSIONS = [
+  '.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg',
+  '.pdf',
+  '.txt', '.md',
+  '.json',
+  '.zip', '.tar', '.gz'
+];
+
+// ====== Security Validation Functions ======
+
+/**
+ * Validate file extension
+ */
+function validateFileExtension(filename) {
+  const ext = path.extname(filename).toLowerCase();
+  return ALLOWED_EXTENSIONS.includes(ext);
+}
+
+/**
+ * Validate file type using magic bytes
+ */
+async function validateFileMagicBytes(filePath, mimeType) {
+  // Skip validation for text files
+  if (mimeType.startsWith('text/') || mimeType === 'application/json') {
+    return true;
+  }
+
+  const signatures = FILE_SIGNATURES[mimeType];
+  if (!signatures) {
+    // If no signature defined, rely on MIME type only
+    return true;
+  }
+
+  try {
+    const buffer = Buffer.alloc(12); // Read first 12 bytes
+    const fd = fsSync.openSync(filePath, 'r');
+    fsSync.readSync(fd, buffer, 0, 12, 0);
+    fsSync.closeSync(fd);
+
+    // Check against all known signatures for this type
+    for (const signature of signatures) {
+      let match = true;
+      for (let i = 0; i < signature.length; i++) {
+        if (signature[i] !== null && buffer[i] !== signature[i]) {
+          match = false;
+          break;
+        }
+      }
+      if (match) {
+        return true;
+      }
+    }
+
+    return false;
+  } catch (error) {
+    console.error('Error validating file magic bytes:', error);
+    return false;
+  }
+}
+
+/**
+ * Sanitize filename to prevent directory traversal
+ */
+function sanitizeFilename(filename) {
+  // Remove path separators and null bytes
+  return filename
+    .replace(/\.\./g, '')
+    .replace(/[\/\\]/g, '')
+    .replace(/\0/g, '')
+    .replace(/[^a-zA-Z0-9._-]/g, '_');
+}
+
+/**
+ * Calculate file hash (SHA-256)
+ */
+async function calculateFileHash(filePath) {
+  return new Promise((resolve, reject) => {
+    const hash = crypto.createHash('sha256');
+    const stream = fsSync.createReadStream(filePath);
+    
+    stream.on('data', (data) => hash.update(data));
+    stream.on('end', () => resolve(hash.digest('hex')));
+    stream.on('error', reject);
+  });
+}
 
 // Ensure upload directory exists
 (async () => {
@@ -72,11 +183,23 @@ const upload = multer({
     fileSize: MAX_FILE_SIZE
   },
   fileFilter: (req, file, cb) => {
-    if (ALLOWED_MIME_TYPES.includes(file.mimetype)) {
-      cb(null, true);
-    } else {
-      cb(new Error(`File type ${file.mimetype} not allowed`));
+    // Validate MIME type
+    if (!ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+      return cb(new Error(`File type ${file.mimetype} not allowed`));
     }
+
+    // Validate file extension
+    if (!validateFileExtension(file.originalname)) {
+      return cb(new Error(`File extension not allowed for ${file.originalname}`));
+    }
+
+    // Additional checks for suspicious filenames
+    const sanitized = sanitizeFilename(file.originalname);
+    if (sanitized !== file.originalname) {
+      return cb(new Error('Invalid characters in filename'));
+    }
+
+    cb(null, true);
   }
 });
 
@@ -139,6 +262,33 @@ router.post(
       const { projectId } = req.params;
       const { description } = req.body;
       const tags = req.body.tags ? JSON.parse(req.body.tags) : [];
+
+      // Validate file magic bytes (deep validation)
+      const isValidMagicBytes = await validateFileMagicBytes(
+        req.file.path,
+        req.file.mimetype
+      );
+
+      if (!isValidMagicBytes) {
+        // Delete invalid file
+        await fs.unlink(req.file.path);
+        return res.status(400).json({
+          success: false,
+          message: 'File content does not match declared type. Possible file type mismatch or corruption.',
+          code: 'INVALID_FILE_SIGNATURE'
+        });
+      }
+
+      // Calculate file hash for integrity checking
+      const fileHash = await calculateFileHash(req.file.path);
+
+      // Check for duplicate files (same hash)
+      const duplicateCheck = await pool.query(
+        `SELECT asset_id, name FROM assets 
+         WHERE project_id = $1 AND file_size = $2
+         LIMIT 10`, // Check only recent similar-sized files
+        [projectId, req.file.size]
+      );
 
       // Store asset metadata in database
       const result = await pool.query(

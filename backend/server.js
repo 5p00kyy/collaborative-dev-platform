@@ -14,6 +14,7 @@ const swaggerSpec = require('./src/config/swagger');
 
 // Import middleware
 const { generalLimiter } = require('./src/middleware/rateLimiter');
+const { setCsrfToken, getCsrfToken } = require('./src/middleware/csrf');
 
 // Import WebSocket
 const { initializeWebSocket } = require('./src/config/websocket');
@@ -63,6 +64,9 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('combined'));
 }
 
+// CSRF token setup (for cookie-based sessions)
+app.use(setCsrfToken);
+
 // ============================================
 // Routes
 // ============================================
@@ -105,6 +109,9 @@ app.get('/api/docs.json', (req, res) => {
   res.setHeader('Content-Type', 'application/json');
   res.send(swaggerSpec);
 });
+
+// CSRF token endpoint
+app.get('/api/csrf-token', getCsrfToken);
 
 // API routes with rate limiting
 app.use('/api', generalLimiter, apiRoutes);
