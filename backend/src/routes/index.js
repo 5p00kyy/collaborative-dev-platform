@@ -10,6 +10,7 @@ const projectRoutes = require('./api/projects');
 const collaboratorRoutes = require('./api/collaborators');
 const noteRoutes = require('./api/notes');
 const ticketRoutes = require('./api/tickets');
+const assetRoutes = require('./api/assets');
 const ruleRoutes = require('./api/rules');
 
 // API version info
@@ -24,6 +25,7 @@ router.get('/', (req, res) => {
       collaborators: '/api/collaborators',
       notes: '/api/notes',
       tickets: '/api/tickets',
+      assets: '/api/assets',
       rules: '/api/rules',
     },
     documentation: '/api/docs',
@@ -36,6 +38,7 @@ router.use('/projects', projectRoutes);
 router.use('/collaborators', collaboratorRoutes);
 router.use('/notes', noteRoutes);
 router.use('/tickets', ticketRoutes);
+router.use('/assets', assetRoutes);
 router.use('/rules', ruleRoutes);
 
 module.exports = router;

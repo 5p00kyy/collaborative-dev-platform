@@ -21,21 +21,39 @@ const AppState = {
 async function apiRequest(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
   
-  const headers = {
-    'Content-Type': 'application/json',
-    ...options.headers,
-  };
+  const headers = {};
+  
+  // Don't set Content-Type for FormData
+  if (!options.isFormData) {
+    headers['Content-Type'] = 'application/json';
+  }
+  
+  // Add custom headers
+  if (options.headers) {
+    Object.assign(headers, options.headers);
+  }
   
   // Add auth token if available
   if (AppState.token) {
     headers['Authorization'] = `Bearer ${AppState.token}`;
   }
   
+  // Prepare request options
+  const requestOptions = {
+    ...options,
+    headers,
+  };
+  
+  // Convert body to JSON if not FormData
+  if (options.body && !options.isFormData && typeof options.body === 'object') {
+    requestOptions.body = JSON.stringify(options.body);
+  }
+  
+  // Remove isFormData flag
+  delete requestOptions.isFormData;
+  
   try {
-    const response = await fetch(url, {
-      ...options,
-      headers,
-    });
+    const response = await fetch(url, requestOptions);
     
     const data = await response.json();
     
@@ -46,7 +64,9 @@ async function apiRequest(endpoint, options = {}) {
     return data;
   } catch (error) {
     console.error('API request error:', error);
-    showToast(error.message, 'danger');
+    if (error.message) {
+      showToast(error.message, 'danger');
+    }
     throw error;
   }
 }

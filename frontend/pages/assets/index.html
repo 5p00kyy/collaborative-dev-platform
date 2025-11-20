@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assets - Collaborative Dev Platform</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="../../assets/css/custom.css" rel="stylesheet">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="/frontend/pages/index.html">
+        <i class="bi bi-code-square"></i> DevPlatform
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="/frontend/pages/projects/dashboard.html">Projects</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/frontend/pages/tickets/list.html">Tickets</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/frontend/pages/notes/index.html">Notes</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="#">Assets</a>
+          </li>
+          <li class="nav-item">
+            <span class="nav-link" id="userInfo"></span>
+          </li>
+          <li class="nav-item">
+            <button class="btn btn-sm btn-outline-light" id="logoutBtn">Logout</button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="container mt-4">
+    <!-- Header -->
+    <div class="row mb-4">
+      <div class="col-md-8">
+        <h2><i class="bi bi-folder2-open"></i> Assets</h2>
+        <p class="text-muted" id="projectName">Select a project to view assets</p>
+      </div>
+      <div class="col-md-4 text-end">
+        <button class="btn btn-primary" id="uploadBtn" disabled>
+          <i class="bi bi-upload"></i> Upload Asset
+        </button>
+      </div>
+    </div>
+
+    <!-- Project Selector -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="projectSelect" class="form-label">Select Project</label>
+            <select class="form-select" id="projectSelect">
+              <option value="">Loading projects...</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label for="fileTypeFilter" class="form-label">File Type</label>
+            <select class="form-select" id="fileTypeFilter">
+              <option value="">All Types</option>
+              <option value="image/jpeg">JPEG Images</option>
+              <option value="image/png">PNG Images</option>
+              <option value="image/gif">GIF Images</option>
+              <option value="application/pdf">PDF Documents</option>
+              <option value="text/plain">Text Files</option>
+              <option value="text/markdown">Markdown Files</option>
+              <option value="application/json">JSON Files</option>
+              <option value="application/zip">ZIP Archives</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">&nbsp;</label>
+            <button class="btn btn-secondary w-100" id="filterBtn" disabled>
+              <i class="bi bi-funnel"></i> Filter
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Assets Grid -->
+    <div id="assetsContainer">
+      <div class="text-center text-muted py-5">
+        <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+        <p class="mt-3">Select a project to view its assets</p>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <nav id="paginationNav" style="display: none;">
+      <ul class="pagination justify-content-center" id="paginationList"></ul>
+    </nav>
+  </div>
+
+  <!-- Upload Modal -->
+  <div class="modal fade" id="uploadModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Upload Asset</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="uploadForm">
+            <div class="mb-3">
+              <label for="fileInput" class="form-label">Select File</label>
+              <input type="file" class="form-control" id="fileInput" required>
+              <div class="form-text">
+                Max size: 100MB. Allowed types: Images, PDF, Text, Markdown, JSON, ZIP
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="descriptionInput" class="form-label">Description</label>
+              <textarea class="form-control" id="descriptionInput" rows="3" 
+                        placeholder="Optional description..."></textarea>
+            </div>
+            <div class="mb-3">
+              <label for="tagsInput" class="form-label">Tags</label>
+              <input type="text" class="form-control" id="tagsInput" 
+                     placeholder="Enter tags separated by commas">
+              <div class="form-text">Example: design, mockup, v1</div>
+            </div>
+            <div id="uploadProgress" style="display: none;">
+              <div class="progress">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                     role="progressbar" style="width: 100%"></div>
+              </div>
+              <small class="text-muted">Uploading...</small>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" id="uploadSubmitBtn">Upload</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../../assets/js/app.js"></script>
+  <script>
+    // ====== State ======
+    let currentProjectId = null;
+    let currentPage = 1;
+    const pageLimit = 12;
+    let currentFilter = '';
+    let uploadModal = null;
+
+    // ====== Initialize ======
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!AppState.isAuthenticated()) {
+        window.location.href = '/frontend/pages/auth/login.html';
+        return;
+      }
+
+      updateUserInfo();
+      uploadModal = new bootstrap.Modal(document.getElementById('uploadModal'));
+
+      // Event listeners
+      document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+      document.getElementById('projectSelect').addEventListener('change', handleProjectChange);
+      document.getElementById('uploadBtn').addEventListener('click', () => uploadModal.show());
+      document.getElementById('filterBtn').addEventListener('click', handleFilter);
+      document.getElementById('uploadSubmitBtn').addEventListener('click', handleUpload);
+
+      // Load projects
+      await loadProjects();
+    });
+
+    // ====== UI Functions ======
+    function updateUserInfo() {
+      const user = AppState.getUser();
+      document.getElementById('userInfo').textContent = user ? user.displayName || user.username : '';
+    }
+
+    function handleLogout() {
+      AppState.clearAuth();
+      window.location.href = '/frontend/pages/auth/login.html';
+    }
+
+    async function loadProjects() {
+      try {
+        const response = await apiRequest('/projects');
+        const select = document.getElementById('projectSelect');
+        
+        if (response.data.projects.length === 0) {
+          select.innerHTML = '<option value="">No projects found</option>';
+          return;
+        }
+
+        select.innerHTML = '<option value="">Select a project...</option>' +
+          response.data.projects.map(p => 
+            `<option value="${p.projectId}">${p.name}</option>`
+          ).join('');
+      } catch (error) {
+        showAlert('Failed to load projects', 'danger');
+      }
+    }
+
+    function handleProjectChange() {
+      const select = document.getElementById('projectSelect');
+      currentProjectId = select.value;
+      
+      if (currentProjectId) {
+        document.getElementById('projectName').textContent = 
+          select.options[select.selectedIndex].text;
+        document.getElementById('uploadBtn').disabled = false;
+        document.getElementById('filterBtn').disabled = false;
+        currentPage = 1;
+        loadAssets();
+      } else {
+        document.getElementById('projectName').textContent = 'Select a project to view assets';
+        document.getElementById('uploadBtn').disabled = true;
+        document.getElementById('filterBtn').disabled = true;
+        document.getElementById('assetsContainer').innerHTML = `
+          <div class="text-center text-muted py-5">
+            <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+            <p class="mt-3">Select a project to view its assets</p>
+          </div>
+        `;
+      }
+    }
+
+    function handleFilter() {
+      currentFilter = document.getElementById('fileTypeFilter').value;
+      currentPage = 1;
+      loadAssets();
+    }
+
+    async function loadAssets() {
+      if (!currentProjectId) return;
+
+      try {
+        let url = `/assets/${currentProjectId}?page=${currentPage}&limit=${pageLimit}`;
+        if (currentFilter) {
+          url += `&fileType=${encodeURIComponent(currentFilter)}`;
+        }
+
+        const response = await apiRequest(url);
+        displayAssets(response.data.assets);
+        updatePagination(response.data.pagination);
+      } catch (error) {
+        showAlert('Failed to load assets', 'danger');
+      }
+    }
+
+    function displayAssets(assets) {
+      const container = document.getElementById('assetsContainer');
+      
+      if (assets.length === 0) {
+        container.innerHTML = `
+          <div class="text-center text-muted py-5">
+            <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+            <p class="mt-3">No assets found</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="row g-3">
+          ${assets.map(asset => `
+            <div class="col-md-3">
+              <div class="card h-100">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h6 class="card-title mb-0 text-truncate" title="${escapeHtml(asset.name)}">
+                      ${getFileIcon(asset.fileType)} ${escapeHtml(asset.name)}
+                    </h6>
+                    <div class="dropdown">
+                      <button class="btn btn-sm btn-link" type="button" 
+                              data-bs-toggle="dropdown">
+                        <i class="bi bi-three-dots-vertical"></i>
+                      </button>
+                      <ul class="dropdown-menu">
+                        <li>
+                          <a class="dropdown-item" href="#" 
+                             onclick="downloadAsset('${asset.assetId}')">
+                            <i class="bi bi-download"></i> Download
+                          </a>
+                        </li>
+                        <li>
+                          <a class="dropdown-item text-danger" href="#" 
+                             onclick="deleteAsset('${asset.assetId}', '${escapeHtml(asset.name)}')">
+                            <i class="bi bi-trash"></i> Delete
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  <p class="card-text">
+                    <small class="text-muted">${formatFileSize(asset.fileSize)}</small><br>
+                    <small class="text-muted">${new Date(asset.createdAt).toLocaleDateString()}</small><br>
+                    <small class="text-muted">By: ${escapeHtml(asset.uploadedBy.displayName)}</small>
+                  </p>
+                  ${asset.tags && asset.tags.length > 0 ? `
+                    <div class="mt-2">
+                      ${asset.tags.map(tag => 
+                        `<span class="badge bg-secondary">${escapeHtml(tag)}</span>`
+                      ).join(' ')}
+                    </div>
+                  ` : ''}
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function updatePagination(pagination) {
+      const nav = document.getElementById('paginationNav');
+      const list = document.getElementById('paginationList');
+
+      if (pagination.totalPages <= 1) {
+        nav.style.display = 'none';
+        return;
+      }
+
+      nav.style.display = 'block';
+      let items = '';
+
+      // Previous button
+      items += `
+        <li class="page-item ${pagination.page === 1 ? 'disabled' : ''}">
+          <a class="page-link" href="#" onclick="changePage(${pagination.page - 1})">Previous</a>
+        </li>
+      `;
+
+      // Page numbers
+      for (let i = 1; i <= pagination.totalPages; i++) {
+        if (i === 1 || i === pagination.totalPages || 
+            (i >= pagination.page - 2 && i <= pagination.page + 2)) {
+          items += `
+            <li class="page-item ${i === pagination.page ? 'active' : ''}">
+              <a class="page-link" href="#" onclick="changePage(${i})">${i}</a>
+            </li>
+          `;
+        } else if (i === pagination.page - 3 || i === pagination.page + 3) {
+          items += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+        }
+      }
+
+      // Next button
+      items += `
+        <li class="page-item ${pagination.page === pagination.totalPages ? 'disabled' : ''}">
+          <a class="page-link" href="#" onclick="changePage(${pagination.page + 1})">Next</a>
+        </li>
+      `;
+
+      list.innerHTML = items;
+    }
+
+    window.changePage = (page) => {
+      event.preventDefault();
+      currentPage = page;
+      loadAssets();
+    };
+
+    async function handleUpload() {
+      const fileInput = document.getElementById('fileInput');
+      const description = document.getElementById('descriptionInput').value.trim();
+      const tagsInput = document.getElementById('tagsInput').value.trim();
+
+      if (!fileInput.files.length) {
+        showAlert('Please select a file', 'warning');
+        return;
+      }
+
+      const file = fileInput.files[0];
+      const tags = tagsInput ? tagsInput.split(',').map(t => t.trim()).filter(t => t) : [];
+
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('description', description);
+      formData.append('tags', JSON.stringify(tags));
+
+      try {
+        document.getElementById('uploadProgress').style.display = 'block';
+        document.getElementById('uploadSubmitBtn').disabled = true;
+
+        await apiRequest(`/assets/${currentProjectId}/upload`, {
+          method: 'POST',
+          body: formData,
+          isFormData: true
+        });
+
+        showAlert('Asset uploaded successfully', 'success');
+        uploadModal.hide();
+        document.getElementById('uploadForm').reset();
+        loadAssets();
+
+      } catch (error) {
+        showAlert(error.message || 'Failed to upload asset', 'danger');
+      } finally {
+        document.getElementById('uploadProgress').style.display = 'none';
+        document.getElementById('uploadSubmitBtn').disabled = false;
+      }
+    }
+
+    window.downloadAsset = async (assetId) => {
+      event.preventDefault();
+      const token = AppState.getAccessToken();
+      const url = `${API_BASE_URL}/assets/${currentProjectId}/${assetId}/download`;
+      
+      window.open(url + `?token=${token}`, '_blank');
+    };
+
+    window.deleteAsset = async (assetId, name) => {
+      event.preventDefault();
+      if (!confirm(`Delete asset "${name}"?`)) return;
+
+      try {
+        await apiRequest(`/assets/${currentProjectId}/${assetId}`, { method: 'DELETE' });
+        showAlert('Asset deleted successfully', 'success');
+        loadAssets();
+      } catch (error) {
+        showAlert('Failed to delete asset', 'danger');
+      }
+    };
+
+    // ====== Helper Functions ======
+    function getFileIcon(fileType) {
+      if (fileType.startsWith('image/')) return '<i class="bi bi-file-image text-primary"></i>';
+      if (fileType === 'application/pdf') return '<i class="bi bi-file-pdf text-danger"></i>';
+      if (fileType.includes('text')) return '<i class="bi bi-file-text text-info"></i>';
+      if (fileType.includes('json')) return '<i class="bi bi-file-code text-warning"></i>';
+      if (fileType.includes('zip') || fileType.includes('tar')) 
+        return '<i class="bi bi-file-zip text-secondary"></i>';
+      return '<i class="bi bi-file-earmark"></i>';
+    }
+
+    function formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function showAlert(message, type) {
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+      alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      `;
+      document.querySelector('.container').insertBefore(alertDiv, document.querySelector('.row'));
+      setTimeout(() => alertDiv.remove(), 5000);
+    }
+  </script>
+</body>
+</html>
