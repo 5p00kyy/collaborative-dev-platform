@@ -11,6 +11,17 @@
   
   <!-- Custom CSS -->
   <link rel="stylesheet" href="../../assets/css/custom.css">
+  
+  <style>
+    .ticket-card {
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .ticket-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    }
+  </style>
 </head>
 <body>
   
@@ -575,16 +586,5 @@
       setTimeout(() => toast.remove(), 3000);
     }
   </script>
-
-  <style>
-    .ticket-card {
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .ticket-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
-    }
-  </style>
 </body>
 </html>
