@@ -57,9 +57,40 @@ const loginValidation = [
 // ============================================
 
 /**
- * Register a new user
- * POST /api/auth/register
- * Body: { username, email, password, displayName? }
+ * @swagger
+ * /api/auth/register:
+ *   post:
+ *     summary: Register a new user account
+ *     description: Create a new user account with username, email, and password. Returns JWT tokens upon successful registration.
+ *     tags: [Authentication]
+ *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/RegisterRequest'
+ *     responses:
+ *       201:
+ *         description: User registered successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthResponse'
+ *       400:
+ *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       409:
+ *         description: User already exists
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Server error
  */
 router.post('/register', registerValidation, async (req, res) => {
   try {
@@ -145,9 +176,34 @@ router.post('/register', registerValidation, async (req, res) => {
 // ============================================
 
 /**
- * Login user
- * POST /api/auth/login
- * Body: { email, password }
+ * @swagger
+ * /api/auth/login:
+ *   post:
+ *     summary: Login to user account
+ *     description: Authenticate user with email and password. Returns access and refresh JWT tokens.
+ *     tags: [Authentication]
+ *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/LoginRequest'
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthResponse'
+ *       401:
+ *         description: Invalid credentials
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Server error
  */
 router.post('/login', loginValidation, async (req, res) => {
   try {
@@ -238,9 +294,32 @@ router.post('/login', loginValidation, async (req, res) => {
 // ============================================
 
 /**
- * Logout user
- * POST /api/auth/logout
- * Headers: Authorization: Bearer <token>
+ * @swagger
+ * /api/auth/logout:
+ *   post:
+ *     summary: Logout user
+ *     description: Invalidate user's refresh token and logout from current session
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Logout successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Logout successful
+ *       401:
+ *         description: No token provided or invalid token
+ *       500:
+ *         description: Server error
  */
 router.post('/logout', async (req, res) => {
   try {
@@ -280,9 +359,53 @@ router.post('/logout', async (req, res) => {
 // ============================================
 
 /**
- * Refresh access token
- * POST /api/auth/refresh
- * Body: { refreshToken }
+ * @swagger
+ * /api/auth/refresh:
+ *   post:
+ *     summary: Refresh access token
+ *     description: Get a new access token using a valid refresh token
+ *     tags: [Authentication]
+ *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - refreshToken
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *                 description: Valid refresh token
+ *                 example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *     responses:
+ *       200:
+ *         description: Token refreshed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Token refreshed successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     accessToken:
+ *                       type: string
+ *                     refreshToken:
+ *                       type: string
+ *       400:
+ *         description: Refresh token required
+ *       401:
+ *         description: Invalid or expired refresh token
+ *       500:
+ *         description: Server error
  */
 router.post('/refresh', async (req, res) => {
   try {

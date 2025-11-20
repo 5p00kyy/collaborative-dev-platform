@@ -5,10 +5,12 @@ const cors = require('cors');
 const compression = require('compression');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
+const swaggerUi = require('swagger-ui-express');
 
 // Import configurations
 const { pool } = require('./src/config/database');
 const { redisClient } = require('./src/config/redis');
+const swaggerSpec = require('./src/config/swagger');
 
 // Import middleware
 const { generalLimiter } = require('./src/middleware/rateLimiter');
@@ -90,6 +92,18 @@ app.get('/health', async (req, res) => {
       error: error.message
     });
   }
+});
+
+// API Documentation (Swagger)
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'Collaborative Dev Platform API Docs'
+}));
+
+// Swagger JSON endpoint
+app.get('/api/docs.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerSpec);
 });
 
 // API routes with rate limiting

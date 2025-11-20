@@ -60,8 +60,68 @@ const updateProjectValidation = [
 // ============================================
 
 /**
- * Get all projects for the authenticated user
- * GET /api/projects?status=active&visibility=private&search=keyword&page=1&limit=10
+ * @swagger
+ * /api/projects:
+ *   get:
+ *     summary: List all projects
+ *     description: Get all projects owned by or shared with the authenticated user. Supports filtering, search, and pagination.
+ *     tags: [Projects]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [active, archived, wip]
+ *         description: Filter by project status
+ *       - in: query
+ *         name: visibility
+ *         schema:
+ *           type: string
+ *           enum: [private, shared, public]
+ *         description: Filter by visibility
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search in project name and description
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Items per page
+ *     responses:
+ *       200:
+ *         description: Projects retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     projects:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/Project'
+ *                     pagination:
+ *                       $ref: '#/components/schemas/Pagination'
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Server error
  */
 router.get('/', authenticateToken, async (req, res) => {
   try {
