@@ -54,7 +54,7 @@ const cleanDatabase = async () => {
   await pool.query('TRUNCATE TABLE tickets CASCADE');
   await pool.query('TRUNCATE TABLE note_versions CASCADE');
   await pool.query('TRUNCATE TABLE notes CASCADE');
-  await pool.query('TRUNCATE TABLE collaborators CASCADE');
+  await pool.query('TRUNCATE TABLE project_collaborators CASCADE');
   await pool.query('TRUNCATE TABLE projects CASCADE');
   await pool.query('TRUNCATE TABLE users CASCADE');
 };
