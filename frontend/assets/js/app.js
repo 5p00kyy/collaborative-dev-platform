@@ -11,6 +11,7 @@ const AppState = {
   token: null,
   currentProject: null,
   isOnline: navigator.onLine,
+  theme: localStorage.getItem('theme') || 'light',
 };
 
 // ============================================
@@ -205,10 +206,54 @@ window.addEventListener('offline', () => {
 });
 
 // ============================================
+// Theme Management
+// ============================================
+
+function initTheme() {
+  const theme = AppState.theme;
+  document.documentElement.setAttribute('data-theme', theme);
+}
+
+function toggleTheme() {
+  const currentTheme = AppState.theme;
+  const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+  
+  AppState.theme = newTheme;
+  localStorage.setItem('theme', newTheme);
+  document.documentElement.setAttribute('data-theme', newTheme);
+  
+  // Update toggle button icon if it exists
+  const toggleBtn = document.getElementById('theme-toggle');
+  if (toggleBtn) {
+    const icon = toggleBtn.querySelector('i');
+    if (icon) {
+      icon.className = newTheme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
+    }
+  }
+}
+
+function createThemeToggle() {
+  // Check if toggle already exists
+  if (document.getElementById('theme-toggle')) return;
+  
+  const toggleBtn = document.createElement('button');
+  toggleBtn.id = 'theme-toggle';
+  toggleBtn.className = 'theme-toggle';
+  toggleBtn.setAttribute('aria-label', 'Toggle dark mode');
+  toggleBtn.innerHTML = `<i class="bi bi-${AppState.theme === 'dark' ? 'sun-fill' : 'moon-fill'}"></i>`;
+  toggleBtn.onclick = toggleTheme;
+  
+  document.body.appendChild(toggleBtn);
+}
+
+// ============================================
 // Initialize
 // ============================================
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Initialize theme
+  initTheme();
+  
   // Load user token if exists
   const token = Storage.get('token');
   if (token) {
@@ -223,8 +268,15 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.appendChild(container);
   }
   
+  // Create theme toggle button
+  createThemeToggle();
+  
   console.log('App initialized');
 });
+
+// Make functions globally available
+window.toggleTheme = toggleTheme;
+window.initTheme = initTheme;
 
 // Export for use in other scripts
 if (typeof module !== 'undefined' && module.exports) {
@@ -235,6 +287,8 @@ if (typeof module !== 'undefined' && module.exports) {
     Storage,
     isAuthenticated,
     logout,
+    toggleTheme,
+    initTheme,
     AppState,
   };
 }

@@ -2,6 +2,7 @@
    Collaborative Dev Platform - Custom Styles
    ============================================ */
 
+/* Light Theme (Default) */
 :root {
   --primary-color: #0d6efd;
   --secondary-color: #6c757d;
@@ -11,12 +12,95 @@
   --info-color: #0dcaf0;
   --dark-color: #212529;
   --light-color: #f8f9fa;
+  
+  /* Theme Colors */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-tertiary: #e9ecef;
+  --text-primary: #212529;
+  --text-secondary: #6c757d;
+  --text-muted: #adb5bd;
+  --border-color: #dee2e6;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --shadow-color-hover: rgba(0, 0, 0, 0.15);
+  
+  /* Card Colors */
+  --card-bg: #ffffff;
+  --card-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  --card-shadow-hover: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+/* Dark Theme */
+[data-theme="dark"] {
+  --primary-color: #0d6efd;
+  --secondary-color: #6c757d;
+  --success-color: #198754;
+  --danger-color: #dc3545;
+  --warning-color: #ffc107;
+  --info-color: #0dcaf0;
+  
+  /* Dark Theme Colors */
+  --bg-primary: #1a1d23;
+  --bg-secondary: #242830;
+  --bg-tertiary: #2d3139;
+  --text-primary: #e9ecef;
+  --text-secondary: #adb5bd;
+  --text-muted: #6c757d;
+  --border-color: #3d4149;
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  --shadow-color-hover: rgba(0, 0, 0, 0.5);
+  
+  /* Card Colors */
+  --card-bg: #242830;
+  --card-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  --card-shadow-hover: 0 4px 16px rgba(0,0,0,0.5);
+  
+  /* Dark Adjustments */
+  --dark-color: #e9ecef;
+  --light-color: #2d3139;
 }
 
 /* General Styles */
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   line-height: 1.6;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Theme Toggle Button */
+.theme-toggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: var(--primary-color);
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+  box-shadow: 0 2px 10px var(--shadow-color);
+  transition: all 0.3s ease;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.theme-toggle:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 20px var(--shadow-color-hover);
+}
+
+.theme-toggle i {
+  transition: transform 0.3s ease;
+}
+
+.theme-toggle:hover i {
+  transform: rotate(180deg);
 }
 
 /* Landing Page */
@@ -78,13 +162,33 @@ body {
 .project-card {
   border: none;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  background-color: var(--card-bg);
+  color: var(--text-primary);
+  box-shadow: var(--card-shadow);
   transition: all 0.3s ease;
 }
 
 .project-card:hover {
-  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  box-shadow: var(--card-shadow-hover);
   transform: translateY(-2px);
+}
+
+.card {
+  background-color: var(--card-bg);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+.card-body {
+  color: var(--text-primary);
+}
+
+.card-title {
+  color: var(--text-primary);
+}
+
+.card-text {
+  color: var(--text-secondary);
 }
 
 .project-status {
@@ -118,8 +222,8 @@ body {
 
 .editor-sidebar {
   width: 300px;
-  background-color: white;
-  border-right: 1px solid #dee2e6;
+  background-color: var(--bg-primary);
+  border-right: 1px solid var(--border-color);
   overflow-y: auto;
 }
 
@@ -127,11 +231,12 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
+  background-color: var(--bg-secondary);
 }
 
 .editor-toolbar {
-  background-color: white;
-  border-bottom: 1px solid #dee2e6;
+  background-color: var(--bg-primary);
+  border-bottom: 1px solid var(--border-color);
   padding: 10px 15px;
 }
 
@@ -139,31 +244,36 @@ body {
   flex: 1;
   padding: 20px;
   overflow-y: auto;
+  background-color: var(--bg-secondary);
 }
 
 .markdown-editor {
   width: 100%;
   min-height: 500px;
   padding: 15px;
-  border: 1px solid #dee2e6;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   font-family: 'Courier New', monospace;
   font-size: 14px;
   resize: vertical;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 .markdown-preview {
   padding: 15px;
-  background-color: white;
-  border: 1px solid #dee2e6;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   min-height: 500px;
+  color: var(--text-primary);
 }
 
 /* Ticket Styles */
 .ticket-item {
   border-left: 4px solid var(--secondary-color);
-  background-color: white;
+  background-color: var(--card-bg);
+  color: var(--text-primary);
   padding: 15px;
   margin-bottom: 10px;
   border-radius: 4px;
@@ -171,7 +281,7 @@ body {
 }
 
 .ticket-item:hover {
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: var(--card-shadow-hover);
 }
 
 .ticket-item.priority-high {
@@ -212,13 +322,69 @@ body {
 
 /* Form Styles */
 .form-floating > label {
-  color: #6c757d;
+  color: var(--text-secondary);
+}
+
+.form-control,
+.form-select {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  border-color: var(--border-color);
 }
 
 .form-control:focus,
 .form-select:focus {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   border-color: var(--primary-color);
   box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+}
+
+.form-control::placeholder {
+  color: var(--text-muted);
+}
+
+/* Input Groups */
+.input-group-text {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+/* Modals */
+.modal-content {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+.modal-header {
+  border-bottom-color: var(--border-color);
+}
+
+.modal-footer {
+  border-top-color: var(--border-color);
+}
+
+.btn-close {
+  filter: var(--bs-btn-close-white-filter);
+}
+
+[data-theme="dark"] .btn-close {
+  filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* Tables */
+.table {
+  color: var(--text-primary);
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) > * {
+  background-color: var(--bg-tertiary);
+}
+
+.table-hover > tbody > tr:hover > * {
+  background-color: var(--bg-tertiary);
 }
 
 /* Button Styles */
