@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ticket Details - Collaborative Dev Platform</title>
+  
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="../../assets/css/custom.css">
+</head>
+<body>
+  
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container-fluid">
+      <a class="navbar-brand fw-bold" href="/">
+        <i class="bi bi-code-square"></i> DevCollab
+      </a>
+      <div class="d-flex align-items-center">
+        <span class="text-white me-3" id="userDisplayName">Loading...</span>
+        <button class="btn btn-outline-light btn-sm" id="logoutBtn">
+          <i class="bi bi-box-arrow-right"></i> Logout
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="container mt-4">
+    
+    <!-- Loading -->
+    <div id="loadingSpinner" class="text-center py-5">
+      <div class="spinner-border text-primary" role="status"></div>
+      <p class="mt-2 text-muted">Loading ticket...</p>
+    </div>
+
+    <!-- Ticket Content -->
+    <div id="ticketContent" class="d-none">
+      <div class="row">
+        <div class="col-md-8">
+          <!-- Header -->
+          <div class="d-flex justify-content-between align-items-start mb-4">
+            <div>
+              <button class="btn btn-sm btn-outline-secondary mb-2" onclick="window.location.href='list.html'">
+                <i class="bi bi-arrow-left"></i> Back to Tickets
+              </button>
+              <h2 id="ticketTitle">Ticket Title</h2>
+              <div class="d-flex gap-2 mt-2">
+                <span class="badge bg-success" id="ticketType"></span>
+                <span class="badge bg-warning" id="ticketStatus"></span>
+                <span class="badge bg-info" id="ticketPriority"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="card shadow-sm mb-4">
+            <div class="card-header">
+              <h5 class="mb-0"><i class="bi bi-file-text"></i> Description</h5>
+            </div>
+            <div class="card-body">
+              <p id="ticketDescription" class="mb-0"></p>
+            </div>
+          </div>
+
+          <!-- Comments Section -->
+          <div class="card shadow-sm">
+            <div class="card-header">
+              <h5 class="mb-0"><i class="bi bi-chat-dots"></i> Activity & Comments</h5>
+            </div>
+            <div class="card-body">
+              <!-- Add Comment Form -->
+              <div class="mb-4">
+                <textarea class="form-control" id="commentInput" rows="3" placeholder="Add a comment..."></textarea>
+                <button class="btn btn-primary mt-2" id="addCommentBtn">
+                  <i class="bi bi-send"></i> Add Comment
+                </button>
+              </div>
+
+              <!-- Activity Timeline -->
+              <div id="activityTimeline">
+                <!-- Activities will be loaded here -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-md-4">
+          <!-- Details Card -->
+          <div class="card shadow-sm mb-3">
+            <div class="card-header bg-light">
+              <h6 class="mb-0"><i class="bi bi-info-circle"></i> Details</h6>
+            </div>
+            <div class="card-body">
+              <div class="mb-3">
+                <label class="form-label small text-muted">Project</label>
+                <p id="ticketProject" class="mb-0"></p>
+              </div>
+              <div class="mb-3">
+                <label class="form-label small text-muted">Status</label>
+                <select class="form-select form-select-sm" id="updateStatus">
+                  <option value="open">Open</option>
+                  <option value="in_progress">In Progress</option>
+                  <option value="review">Review</option>
+                  <option value="closed">Closed</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label class="form-label small text-muted">Priority</label>
+                <select class="form-select form-select-sm" id="updatePriority">
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                  <option value="critical">Critical</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label class="form-label small text-muted">Type</label>
+                <select class="form-select form-select-sm" id="updateType">
+                  <option value="bug">Bug</option>
+                  <option value="feature">Feature</option>
+                  <option value="task">Task</option>
+                  <option value="idea">Idea</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label class="form-label small text-muted">Assigned To</label>
+                <select class="form-select form-select-sm" id="updateAssignedTo">
+                  <option value="">Unassigned</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label class="form-label small text-muted">Due Date</label>
+                <input type="date" class="form-control form-control-sm" id="updateDueDate">
+              </div>
+              <button class="btn btn-primary btn-sm w-100" id="saveChangesBtn">
+                <i class="bi bi-save"></i> Save Changes
+              </button>
+            </div>
+          </div>
+
+          <!-- Metadata Card -->
+          <div class="card shadow-sm mb-3">
+            <div class="card-header bg-light">
+              <h6 class="mb-0"><i class="bi bi-clock-history"></i> Metadata</h6>
+            </div>
+            <div class="card-body">
+              <div class="mb-2">
+                <small class="text-muted">Created by</small>
+                <p class="mb-1" id="ticketCreator"></p>
+              </div>
+              <div class="mb-2">
+                <small class="text-muted">Created at</small>
+                <p class="mb-1" id="ticketCreatedAt"></p>
+              </div>
+              <div class="mb-2">
+                <small class="text-muted">Last updated</small>
+                <p class="mb-0" id="ticketUpdatedAt"></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Danger Zone -->
+          <div class="card shadow-sm border-danger" id="dangerZone">
+            <div class="card-header bg-danger text-white">
+              <h6 class="mb-0"><i class="bi bi-trash"></i> Danger Zone</h6>
+            </div>
+            <div class="card-body">
+              <button class="btn btn-danger btn-sm w-100" onclick="deleteTicket()">
+                <i class="bi bi-trash"></i> Delete Ticket
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- Custom JS -->
+  <script src="../../assets/js/app.js"></script>
+  <script>
+    const API_URL = 'http://localhost:3000/api';
+    const urlParams = new URLSearchParams(window.location.search);
+    const ticketId = urlParams.get('id');
+    let currentTicket = null;
+    let currentUser = null;
+
+    if (!ticketId) {
+      window.location.href = 'list.html';
+    }
+
+    // Check authentication
+    document.addEventListener('DOMContentLoaded', () => {
+      currentUser = AppState.getUser();
+      if (!currentUser) {
+        window.location.href = '../auth/login.html';
+        return;
+      }
+
+      document.getElementById('userDisplayName').textContent = currentUser.displayName || currentUser.username;
+      loadTicket();
+    });
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      try {
+        await apiRequest('/auth/logout', { method: 'POST' });
+      } catch (error) {
+        console.error('Logout error:', error);
+      } finally {
+        AppState.clearUser();
+        window.location.href = '../auth/login.html';
+      }
+    });
+
+    // Load ticket
+    async function loadTicket() {
+      try {
+        const data = await apiRequest(`/tickets/${ticketId}`);
+        
+        if (data.success) {
+          currentTicket = data.data.ticket;
+          displayTicket(currentTicket);
+          displayActivities(data.data.activities);
+          await loadCollaborators(currentTicket.project_id);
+        }
+      } catch (error) {
+        console.error('Load ticket error:', error);
+        showToast('Failed to load ticket', 'danger');
+        setTimeout(() => window.location.href = 'list.html', 2000);
+      } finally {
+        document.getElementById('loadingSpinner').classList.add('d-none');
+        document.getElementById('ticketContent').classList.remove('d-none');
+      }
+    }
+
+    // Display ticket
+    function displayTicket(ticket) {
+      document.getElementById('ticketTitle').textContent = ticket.title;
+      document.getElementById('ticketType').textContent = ticket.type;
+      document.getElementById('ticketStatus').textContent = formatStatus(ticket.status);
+      document.getElementById('ticketPriority').textContent = ticket.priority;
+      document.getElementById('ticketDescription').textContent = ticket.description || 'No description provided';
+      document.getElementById('ticketProject').textContent = ticket.project_name;
+      document.getElementById('ticketCreator').textContent = ticket.creator_display_name || ticket.creator_username;
+      document.getElementById('ticketCreatedAt').textContent = new Date(ticket.created_at).toLocaleString();
+      document.getElementById('ticketUpdatedAt').textContent = new Date(ticket.updated_at).toLocaleString();
+
+      // Set form values
+      document.getElementById('updateStatus').value = ticket.status;
+      document.getElementById('updatePriority').value = ticket.priority;
+      document.getElementById('updateType').value = ticket.type;
+      document.getElementById('updateAssignedTo').value = ticket.assigned_to || '';
+      document.getElementById('updateDueDate').value = ticket.due_date ? ticket.due_date.split('T')[0] : '';
+
+      // Update badge colors
+      document.getElementById('ticketType').className = `badge bg-${getTypeColor(ticket.type)}`;
+      document.getElementById('ticketStatus').className = `badge bg-${getStatusColor(ticket.status)}`;
+      document.getElementById('ticketPriority').className = `badge bg-${getPriorityColor(ticket.priority)}`;
+    }
+
+    // Load collaborators for assignment
+    async function loadCollaborators(projectId) {
+      try {
+        const data = await apiRequest(`/collaborators/project/${projectId}`);
+        
+        if (data.success) {
+          const options = data.data.collaborators
+            .filter(c => c.accepted_at)
+            .map(c => `<option value="${c.user_id}" ${c.user_id === currentTicket.assigned_to ? 'selected' : ''}>${c.display_name || c.username}</option>`)
+            .join('');
+          
+          document.getElementById('updateAssignedTo').innerHTML = `<option value="">Unassigned</option>${options}`;
+        }
+      } catch (error) {
+        console.error('Load collaborators error:', error);
+      }
+    }
+
+    // Display activities
+    function displayActivities(activities) {
+      const timeline = document.getElementById('activityTimeline');
+      
+      if (activities.length === 0) {
+        timeline.innerHTML = '<p class="text-muted">No activity yet</p>';
+        return;
+      }
+
+      timeline.innerHTML = activities.map(activity => {
+        if (activity.activity_type === 'comment') {
+          return `
+            <div class="border-start border-3 border-primary ps-3 pb-3 mb-3">
+              <div class="d-flex justify-content-between">
+                <strong>${activity.display_name || activity.username}</strong>
+                <small class="text-muted">${formatDate(activity.created_at)}</small>
+              </div>
+              <p class="mt-2 mb-0">${escapeHtml(activity.content)}</p>
+            </div>
+          `;
+        } else {
+          return `
+            <div class="border-start border-2 border-secondary ps-3 pb-3 mb-3">
+              <div class="d-flex justify-content-between">
+                <small class="text-muted">
+                  <i class="bi bi-clock-history"></i> 
+                  ${activity.display_name || activity.username} 
+                  ${activity.activity_type === 'created' ? 'created this ticket' : 'updated this ticket'}
+                </small>
+                <small class="text-muted">${formatDate(activity.created_at)}</small>
+              </div>
+            </div>
+          `;
+        }
+      }).join('');
+    }
+
+    // Add comment
+    document.getElementById('addCommentBtn').addEventListener('click', async () => {
+      const content = document.getElementById('commentInput').value.trim();
+      
+      if (!content) {
+        showToast('Comment cannot be empty', 'warning');
+        return;
+      }
+
+      try {
+        const data = await apiRequest(`/tickets/${ticketId}/comments`, {
+          method: 'POST',
+          body: JSON.stringify({ content })
+        });
+
+        if (data.success) {
+          showToast('Comment added successfully!', 'success');
+          document.getElementById('commentInput').value = '';
+          loadTicket(); // Reload to show new comment
+        }
+      } catch (error) {
+        console.error('Add comment error:', error);
+        showToast(error.message || 'Failed to add comment', 'danger');
+      }
+    });
+
+    // Save changes
+    document.getElementById('saveChangesBtn').addEventListener('click', async () => {
+      const status = document.getElementById('updateStatus').value;
+      const priority = document.getElementById('updatePriority').value;
+      const type = document.getElementById('updateType').value;
+      const assignedTo = document.getElementById('updateAssignedTo').value || null;
+      const dueDate = document.getElementById('updateDueDate').value || null;
+
+      try {
+        const data = await apiRequest(`/tickets/${ticketId}`, {
+          method: 'PUT',
+          body: JSON.stringify({ status, priority, type, assignedTo, dueDate })
+        });
+
+        if (data.success) {
+          showToast('Ticket updated successfully!', 'success');
+          currentTicket = data.data.ticket;
+          displayTicket(currentTicket);
+          loadTicket(); // Reload to show activity
+        }
+      } catch (error) {
+        console.error('Update ticket error:', error);
+        showToast(error.message || 'Failed to update ticket', 'danger');
+      }
+    });
+
+    // Delete ticket
+    async function deleteTicket() {
+      if (!confirm('Are you sure you want to delete this ticket? This action cannot be undone.')) {
+        return;
+      }
+
+      try {
+        await apiRequest(`/tickets/${ticketId}`, { method: 'DELETE' });
+        showToast('Ticket deleted successfully', 'success');
+        setTimeout(() => window.location.href = 'list.html', 1500);
+      } catch (error) {
+        console.error('Delete ticket error:', error);
+        showToast('Failed to delete ticket', 'danger');
+      }
+    }
+
+    // Helper functions
+    function getStatusColor(status) {
+      const colors = { open: 'success', in_progress: 'warning', review: 'info', closed: 'secondary' };
+      return colors[status] || 'secondary';
+    }
+
+    function getPriorityColor(priority) {
+      const colors = { critical: 'danger', high: 'warning', medium: 'info', low: 'secondary' };
+      return colors[priority] || 'secondary';
+    }
+
+    function getTypeColor(type) {
+      const colors = { bug: 'danger', feature: 'primary', task: 'success', idea: 'info' };
+      return colors[type] || 'secondary';
+    }
+
+    function formatStatus(status) {
+      return status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+    }
+
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleString();
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function showToast(message, type = 'info') {
+      const toast = document.createElement('div');
+      toast.className = `alert alert-${type} position-fixed top-0 end-0 m-3`;
+      toast.style.zIndex = '9999';
+      toast.innerHTML = message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+  </script>
+</body>
+</html>
