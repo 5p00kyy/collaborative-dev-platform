@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - Collaborative Dev Platform</title>
+  
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="../../assets/css/custom.css">
+</head>
+<body class="bg-light">
+  
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="/">
+        <i class="bi bi-code-square"></i> DevCollab
+      </a>
+    </div>
+  </nav>
+
+  <!-- Register Form -->
+  <div class="container">
+    <div class="row justify-content-center mt-5">
+      <div class="col-md-6 col-lg-5">
+        <div class="card shadow-sm">
+          <div class="card-body p-5">
+            <h2 class="text-center mb-4">
+              <i class="bi bi-person-plus text-primary"></i> Create Account
+            </h2>
+            
+            <!-- Error Alert -->
+            <div id="errorAlert" class="alert alert-danger d-none" role="alert">
+              <i class="bi bi-exclamation-triangle-fill"></i>
+              <span id="errorMessage"></span>
+            </div>
+
+            <!-- Register Form -->
+            <form id="registerForm">
+              <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-at"></i></span>
+                  <input 
+                    type="text" 
+                    class="form-control" 
+                    id="username" 
+                    name="username"
+                    placeholder="username"
+                    pattern="[a-zA-Z0-9_-]{3,50}"
+                    minlength="3"
+                    maxlength="50"
+                    required
+                  >
+                </div>
+                <small class="form-text text-muted">
+                  3-50 characters, letters, numbers, underscores, and hyphens only
+                </small>
+              </div>
+
+              <div class="mb-3">
+                <label for="email" class="form-label">Email Address</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                  <input 
+                    type="email" 
+                    class="form-control" 
+                    id="email" 
+                    name="email"
+                    placeholder="you@example.com"
+                    required
+                  >
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="displayName" class="form-label">Display Name (Optional)</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-person"></i></span>
+                  <input 
+                    type="text" 
+                    class="form-control" 
+                    id="displayName" 
+                    name="displayName"
+                    placeholder="Your Name"
+                    maxlength="100"
+                  >
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                  <input 
+                    type="password" 
+                    class="form-control" 
+                    id="password" 
+                    name="password"
+                    placeholder="Enter password"
+                    minlength="8"
+                    required
+                  >
+                  <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                </div>
+                <small class="form-text text-muted">
+                  At least 8 characters with uppercase, lowercase, and number
+                </small>
+                <!-- Password strength indicator -->
+                <div class="progress mt-2" style="height: 5px;">
+                  <div id="passwordStrength" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="confirmPassword" class="form-label">Confirm Password</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                  <input 
+                    type="password" 
+                    class="form-control" 
+                    id="confirmPassword" 
+                    name="confirmPassword"
+                    placeholder="Confirm password"
+                    required
+                  >
+                </div>
+                <small id="passwordMatch" class="form-text"></small>
+              </div>
+
+              <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="agreeTerms" required>
+                <label class="form-check-label" for="agreeTerms">
+                  I agree to the <a href="#" class="text-decoration-none">Terms of Service</a> 
+                  and <a href="#" class="text-decoration-none">Privacy Policy</a>
+                </label>
+              </div>
+
+              <button type="submit" class="btn btn-primary w-100 mb-3" id="registerBtn">
+                <span id="registerBtnText">
+                  <i class="bi bi-person-plus"></i> Create Account
+                </span>
+                <span id="registerSpinner" class="d-none">
+                  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                  Creating account...
+                </span>
+              </button>
+            </form>
+
+            <hr class="my-4">
+
+            <div class="text-center">
+              <p class="mb-0">Already have an account? 
+                <a href="login.html" class="text-decoration-none fw-bold">Login here</a>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Additional Info -->
+        <div class="text-center mt-3 text-muted">
+          <small>
+            <i class="bi bi-shield-lock"></i> Your data is encrypted and secure
+          </small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- Custom JS -->
+  <script>
+    const API_URL = 'http://localhost:3000/api';
+
+    // Toggle password visibility
+    document.getElementById('togglePassword').addEventListener('click', function() {
+      const passwordInput = document.getElementById('password');
+      const icon = this.querySelector('i');
+      
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.classList.remove('bi-eye');
+        icon.classList.add('bi-eye-slash');
+      } else {
+        passwordInput.type = 'password';
+        icon.classList.remove('bi-eye-slash');
+        icon.classList.add('bi-eye');
+      }
+    });
+
+    // Password strength checker
+    document.getElementById('password').addEventListener('input', function() {
+      const password = this.value;
+      const strengthBar = document.getElementById('passwordStrength');
+      
+      let strength = 0;
+      if (password.length >= 8) strength += 25;
+      if (password.match(/[a-z]/)) strength += 25;
+      if (password.match(/[A-Z]/)) strength += 25;
+      if (password.match(/[0-9]/)) strength += 25;
+      
+      strengthBar.style.width = strength + '%';
+      
+      if (strength < 50) {
+        strengthBar.className = 'progress-bar bg-danger';
+      } else if (strength < 75) {
+        strengthBar.className = 'progress-bar bg-warning';
+      } else {
+        strengthBar.className = 'progress-bar bg-success';
+      }
+    });
+
+    // Password match checker
+    document.getElementById('confirmPassword').addEventListener('input', function() {
+      const password = document.getElementById('password').value;
+      const confirmPassword = this.value;
+      const matchText = document.getElementById('passwordMatch');
+      
+      if (confirmPassword === '') {
+        matchText.textContent = '';
+        return;
+      }
+      
+      if (password === confirmPassword) {
+        matchText.textContent = 'Passwords match';
+        matchText.className = 'form-text text-success';
+      } else {
+        matchText.textContent = 'Passwords do not match';
+        matchText.className = 'form-text text-danger';
+      }
+    });
+
+    // Handle register form submission
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const username = document.getElementById('username').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      const displayName = document.getElementById('displayName').value;
+      
+      // Validate passwords match
+      if (password !== confirmPassword) {
+        showError('Passwords do not match');
+        return;
+      }
+      
+      // Show loading state
+      document.getElementById('registerBtnText').classList.add('d-none');
+      document.getElementById('registerSpinner').classList.remove('d-none');
+      document.getElementById('registerBtn').disabled = true;
+      document.getElementById('errorAlert').classList.add('d-none');
+      
+      try {
+        const response = await fetch(`${API_URL}/auth/register`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ 
+            username, 
+            email, 
+            password,
+            displayName: displayName || username
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+          // Store tokens
+          localStorage.setItem('accessToken', data.data.accessToken);
+          localStorage.setItem('refreshToken', data.data.refreshToken);
+          localStorage.setItem('user', JSON.stringify(data.data.user));
+          
+          // Show success message
+          showToast('Account created successfully! Redirecting...', 'success');
+          
+          // Redirect to dashboard
+          setTimeout(() => {
+            window.location.href = '/pages/dashboard.html';
+          }, 1500);
+          
+        } else {
+          // Show error
+          if (data.errors && data.errors.length > 0) {
+            showError(data.errors.map(e => e.msg).join(', '));
+          } else {
+            showError(data.message || 'Registration failed');
+          }
+        }
+        
+      } catch (error) {
+        console.error('Registration error:', error);
+        showError('Unable to connect to server. Please try again.');
+      } finally {
+        // Reset button state
+        document.getElementById('registerBtnText').classList.remove('d-none');
+        document.getElementById('registerSpinner').classList.add('d-none');
+        document.getElementById('registerBtn').disabled = false;
+      }
+    });
+
+    function showError(message) {
+      const errorAlert = document.getElementById('errorAlert');
+      const errorMessage = document.getElementById('errorMessage');
+      errorMessage.textContent = message;
+      errorAlert.classList.remove('d-none');
+      
+      // Scroll to error
+      errorAlert.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function showToast(message, type = 'info') {
+      // Simple toast notification
+      const toast = document.createElement('div');
+      toast.className = `alert alert-${type} position-fixed top-0 end-0 m-3`;
+      toast.style.zIndex = '9999';
+      toast.innerHTML = `
+        <i class="bi bi-check-circle-fill"></i> ${message}
+      `;
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
