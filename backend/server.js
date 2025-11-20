@@ -10,6 +10,12 @@ const cookieParser = require('cookie-parser');
 const { pool } = require('./src/config/database');
 const { redisClient } = require('./src/config/redis');
 
+// Import middleware
+const { generalLimiter } = require('./src/middleware/rateLimiter');
+
+// Import WebSocket
+const { initializeWebSocket } = require('./src/config/websocket');
+
 // Import routes
 const apiRoutes = require('./src/routes');
 
@@ -86,8 +92,8 @@ app.get('/health', async (req, res) => {
   }
 });
 
-// API routes
-app.use('/api', apiRoutes);
+// API routes with rate limiting
+app.use('/api', generalLimiter, apiRoutes);
 
 // 404 handler
 app.use((req, res) => {
@@ -127,7 +133,7 @@ async function startServer() {
     console.log('✓ Redis connected');
     
     // Start HTTP server
-    app.listen(PORT, () => {
+    const server = app.listen(PORT, () => {
       console.log(`
 ╔════════════════════════════════════════════════╗
 ║   Collaborative Dev Platform - Backend API     ║
@@ -138,6 +144,11 @@ async function startServer() {
 ╚════════════════════════════════════════════════╝
       `);
     });
+
+    // Initialize WebSocket
+    initializeWebSocket(server);
+    
+    return server;
     
   } catch (error) {
     console.error('Failed to start server:', error);
@@ -161,8 +172,9 @@ process.on('SIGINT', async () => {
 });
 
 // Start the server
+let server;
 if (require.main === module) {
-  startServer();
+  server = startServer();
 }
 
-module.exports = app;
+module.exports = { app, server };

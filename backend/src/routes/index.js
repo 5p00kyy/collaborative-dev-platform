@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
 
+// Import rate limiters
+const { authLimiter, createLimiter } = require('../middleware/rateLimiter');
+
 // Import API route modules
 const authRoutes = require('./api/auth');
 const projectRoutes = require('./api/projects');
@@ -27,8 +30,8 @@ router.get('/', (req, res) => {
   });
 });
 
-// Mount route modules
-router.use('/auth', authRoutes);
+// Mount route modules with specific rate limiters
+router.use('/auth', authLimiter, authRoutes);
 router.use('/projects', projectRoutes);
 router.use('/collaborators', collaboratorRoutes);
 router.use('/notes', noteRoutes);
